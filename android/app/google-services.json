@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "322403667686",
+    "project_id": "restaubook-89fa3",
+    "storage_bucket": "restaubook-89fa3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:322403667686:android:97f2910fdc6fe1156d7527",
+        "android_client_info": {
+          "package_name": "com.sanaa.restaubook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLUvm2K47C5Surmv5Np8_LT5y9dTvEU5A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:322403667686:android:dc5112ded085acbf6d7527",
+        "android_client_info": {
+          "package_name": "com.sanaa.restaubook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLUvm2K47C5Surmv5Np8_LT5y9dTvEU5A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
