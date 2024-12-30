@@ -27,10 +27,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -44,38 +41,47 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDXtyVctpHy0QjK9ux5WOj3R0ApScpvuVc',
-    appId: '1:322403667686:web:8a5858cc12c041b86d7527',
-    messagingSenderId: '322403667686',
-    projectId: 'restaubook-89fa3',
-    authDomain: 'restaubook-89fa3.firebaseapp.com',
-    storageBucket: 'restaubook-89fa3.firebasestorage.app',
-    measurementId: 'G-G96S1EZH06',
+    apiKey: 'AIzaSyDh282gwjtmR0pZsK8TfJ4S0tZ3fqGgHhE',
+    appId: '1:582601284988:web:6af8180acca617a6fc58f9',
+    messagingSenderId: '582601284988',
+    projectId: 'atelier-4-elghoul-iir5g6',
+    authDomain: 'atelier-4-elghoul-iir5g6.firebaseapp.com',
+    storageBucket: 'atelier-4-elghoul-iir5g6.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBLUvm2K47C5Surmv5Np8_LT5y9dTvEU5A',
-    appId: '1:322403667686:android:97f2910fdc6fe1156d7527',
-    messagingSenderId: '322403667686',
-    projectId: 'restaubook-89fa3',
-    storageBucket: 'restaubook-89fa3.firebasestorage.app',
+    apiKey: 'AIzaSyBTeeCGlNLTKaIsi2R1nHXCmyVijf5-4CU',
+    appId: '1:582601284988:android:e01b2f6b51f3ee8dfc58f9',
+    messagingSenderId: '582601284988',
+    projectId: 'atelier-4-elghoul-iir5g6',
+    storageBucket: 'atelier-4-elghoul-iir5g6.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAqpBNtPerSCETLI1PS0SbRPmS3fjqYg5c',
-    appId: '1:322403667686:ios:44864438e80e08056d7527',
-    messagingSenderId: '322403667686',
-    projectId: 'restaubook-89fa3',
-    storageBucket: 'restaubook-89fa3.firebasestorage.app',
+    apiKey: 'AIzaSyA9ejQtQ0puSOaeQWPpdfouEOvp7qNsAa8',
+    appId: '1:582601284988:ios:dde0adf351ece846fc58f9',
+    messagingSenderId: '582601284988',
+    projectId: 'atelier-4-elghoul-iir5g6',
+    storageBucket: 'atelier-4-elghoul-iir5g6.firebasestorage.app',
     iosBundleId: 'com.example.restaubook',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAqpBNtPerSCETLI1PS0SbRPmS3fjqYg5c',
-    appId: '1:322403667686:ios:44864438e80e08056d7527',
-    messagingSenderId: '322403667686',
-    projectId: 'restaubook-89fa3',
-    storageBucket: 'restaubook-89fa3.firebasestorage.app',
+    apiKey: 'AIzaSyA9ejQtQ0puSOaeQWPpdfouEOvp7qNsAa8',
+    appId: '1:582601284988:ios:dde0adf351ece846fc58f9',
+    messagingSenderId: '582601284988',
+    projectId: 'atelier-4-elghoul-iir5g6',
+    storageBucket: 'atelier-4-elghoul-iir5g6.firebasestorage.app',
     iosBundleId: 'com.example.restaubook',
   );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyDh282gwjtmR0pZsK8TfJ4S0tZ3fqGgHhE',
+    appId: '1:582601284988:web:658876f3b1affffefc58f9',
+    messagingSenderId: '582601284988',
+    projectId: 'atelier-4-elghoul-iir5g6',
+    authDomain: 'atelier-4-elghoul-iir5g6.firebaseapp.com',
+    storageBucket: 'atelier-4-elghoul-iir5g6.firebasestorage.app',
+  );
+
 }

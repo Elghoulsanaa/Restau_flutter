@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:restaubook/Homepages/Home.dart';
@@ -16,6 +17,59 @@ class _LoginState extends State<Login> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String _selectedRole = "User";
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _login() async {
+    try {
+      // Vérification des champs vides
+      if (_emailController.text.trim().isEmpty ||
+          _passwordController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill in all fields.')),
+        );
+        return;
+      }
+
+      // Tentative de connexion avec Firebase Authentication
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Redirection vers la page d'accueil en cas de succès
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      if (e.code == 'user-not-found') {
+        errorMessage = 'No user found for that email.';
+      } else if (e.code == 'wrong-password') {
+        errorMessage = 'Wrong password provided.';
+      } else {
+        errorMessage = e.message ?? 'An error occurred.';
+      }
+
+      // Affichage du message d'erreur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      // Gestion d'autres erreurs
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -29,9 +83,9 @@ class _LoginState extends State<Login> {
                 // Demi-cercle grenat en haut à droite
                 Container(
                   height: MediaQuery.of(context).size.height * 0.2,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF800020),
-                    borderRadius: const BorderRadius.only(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF800020),
+                    borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(100),
                     ),
                   ),
@@ -145,82 +199,13 @@ class _LoginState extends State<Login> {
                           ),
                         ),
                       ),
-                      // Boutons Radio pour choisir le rôle
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          children: [
-                            const Text(
-                              "Are you?",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Radio<String>(
-                                  value: "User",
-                                  groupValue: _selectedRole,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedRole = value!;
-                                    });
-                                  },
-                                ),
-                                const Text("User"),
-                                const SizedBox(width: 20),
-                                Radio<String>(
-                                  value: "Admin",
-                                  groupValue: _selectedRole,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedRole = value!;
-                                    });
-                                  },
-                                ),
-                                const Text("Admin"),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Forgotpass(),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              "Forgot Password",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
 
                       // Bouton Login
                       Padding(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                             horizontal: 32.0, vertical: 10.0),
                         child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Home()),
-                            );
-                          },
+                          onTap: _login, // Appelle la méthode de connexion
                           child: Container(
                             height: 40,
                             width: double.infinity,
@@ -278,9 +263,8 @@ class _LoginState extends State<Login> {
                           ],
                         ),
                       ),
-                      SizedBox(
-                        height: 10,
-                      ),
+
+                      // Lien vers l'inscription
                       Padding(
                         padding: const EdgeInsets.fromLTRB(48, 8, 8, 8),
                         child: Row(
@@ -298,8 +282,7 @@ class _LoginState extends State<Login> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          Signup()), // Redirection
+                                      builder: (context) => Signup()),
                                 );
                               },
                               child: const Text(
@@ -314,9 +297,6 @@ class _LoginState extends State<Login> {
                           ],
                         ),
                       ),
-
-                      const SizedBox(
-                          height: 10), // Espacement pour éviter le débordement
                     ],
                   ),
                 ),
