@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:restaubook/Homepages/RestaurantDetailPage.dart';
 
 class Home extends StatelessWidget {
@@ -47,7 +49,7 @@ class Home extends StatelessWidget {
                       ),
                       const Spacer(),
                       Image.asset(
-                        'images/logoBon.png', // Remplace par ton image réelle
+                        'images/logoBon.png', // Replace with your actual logo image
                         height: 50,
                         width: 50,
                         fit: BoxFit.cover,
@@ -94,7 +96,7 @@ class Home extends StatelessWidget {
                           },
                           child: ClipOval(
                             child: Image.asset(
-                              'images/category_$i.png',
+                              'images/category_$i.png', // Replace with actual category images
                               width: 70,
                               height: 70,
                               fit: BoxFit.cover,
@@ -115,41 +117,63 @@ class Home extends StatelessWidget {
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    // Navigate to RestaurantDetailPage
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RestaurantDetailPage(
-                          imageUrl: "images/dar.jpg",
-                          name: 'Plais Dar Soukkar',
-                          address: 'Route de l\'Ourika, Marrakesh 40000',
-                          rating: 3.9,
-                          phoneNumber:
-                              '+212 123 456 789', // Example phone number
-                          details:
-                              'Authentic Moroccan cuisine with traditional ambiance.',
-                          openHours:
-                              '10:00 AM - 10:00 PM', // Example open hours
-                        ),
-                      ),
+                // Fetching restaurant data from Firestore
+                FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('restaurants')
+                      .get(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                          child: Text('No restaurants available.'));
+                    }
+
+                    // Displaying the list of restaurants
+                    return Column(
+                      children: snapshot.data!.docs.map((doc) {
+                        String imageUrl = doc[
+                            'imageUrl']; // Assuming imageUrl is stored as a string
+                        String name = doc['name'];
+                        String address = doc['address'];
+                        double rating = doc['rating'].toDouble();
+                        bool isOpen = doc['isOpen'];
+                        return GestureDetector(
+                          onTap: () {
+                            // Navigate to RestaurantDetailPage with details
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RestaurantDetailPage(
+                                  imageUrl: imageUrl,
+                                  name: name,
+                                  address: address,
+                                  rating: rating,
+                                  phoneNumber: doc['phoneNumber'],
+                                  details: doc['details'],
+                                  openHours: doc['openHours'],
+                                ),
+                              ),
+                            );
+                          },
+                          child: RestaurantCard(
+                            imageUrl: imageUrl,
+                            name: name,
+                            address: address,
+                            rating: rating,
+                            isOpen: isOpen,
+                          ),
+                        );
+                      }).toList(),
                     );
                   },
-                  child: const RestaurantCard(
-                    imageUrl: "images/lao.jpg",
-                    name: 'Lao Marrakech',
-                    address: 'Rue Oued El Makhazine, novembre 40000',
-                    rating: 4.6,
-                    isOpen: true,
-                  ),
-                ),
-                const RestaurantCard(
-                  imageUrl: "images/passage.jpg",
-                  name: 'Le Passage Restaurant',
-                  address: 'Bd Allal Al Fassi, Marrakech 40000',
-                  rating: 4.1,
-                  isOpen: true,
                 ),
               ],
             ),
@@ -198,8 +222,8 @@ class RestaurantCard extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Image.asset(
-            imageUrl,
+          Image.network(
+            imageUrl, // Use imageUrl fetched from Firestore
             height: 150,
             width: double.infinity,
             fit: BoxFit.cover,

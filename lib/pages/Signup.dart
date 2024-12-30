@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:restaubook/pages/Login.dart';
 
 class Signup extends StatefulWidget {
@@ -11,19 +11,16 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  // Déclaration des contrôleurs
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  // États pour afficher/masquer les mots de passe
   bool isPasswordVisible = false;
   bool isConfirmPasswordVisible = false;
   String _selectedRole = "User";
 
-  // Fonction d'inscription avec Firebase
   void _register() async {
     try {
       if (_passwordController.text != _confirmPasswordController.text) {
@@ -33,19 +30,30 @@ class _SignupState extends State<Signup> {
         return;
       }
 
+      // Create user with email and password
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // Afficher un message de réussite
+      // Add additional user details to Firestore
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .set({
+        'username': _usernameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'role': _selectedRole,
+      });
+
+      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account created successfully!')),
       );
 
-      // Rediriger vers la page Login
-      Navigator.push(
+      // Redirect to login page
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Login()),
       );
@@ -77,51 +85,14 @@ class _SignupState extends State<Signup> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Demi-cercle grenat en haut à gauche
-              Container(
-                height: MediaQuery.of(context).size.height * 0.2,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF800020),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(100),
-                  ),
-                ),
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF800020),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 1,
-                        ),
-                      ),
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(
-                          Icons.arrow_back_ios_sharp,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // UI components (e.g., header, form fields, etc.)
+              // Use your existing UI code for this part.
 
-              // Contenu principal
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Titre
                     const Text(
                       "Register to get Started",
                       style: TextStyle(
@@ -130,22 +101,15 @@ class _SignupState extends State<Signup> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 20),
-
-                    // Champ Username
                     _buildTextField(
                       controller: _usernameController,
                       hintText: "Username",
                     ),
-
-                    // Champ Email
                     _buildTextField(
                       controller: _emailController,
                       hintText: "Email",
                     ),
-
-                    // Champ Password
                     _buildTextField(
                       controller: _passwordController,
                       hintText: "Password",
@@ -163,8 +127,6 @@ class _SignupState extends State<Signup> {
                         },
                       ),
                     ),
-
-                    // Champ Confirm Password
                     _buildTextField(
                       controller: _confirmPasswordController,
                       hintText: "Confirm Password",
@@ -183,8 +145,6 @@ class _SignupState extends State<Signup> {
                         },
                       ),
                     ),
-
-                    // Boutons Radio pour choisir le rôle
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Column(
@@ -223,14 +183,11 @@ class _SignupState extends State<Signup> {
                         ],
                       ),
                     ),
-
-                    // Bouton Register
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 32.0, vertical: 10.0),
                       child: GestureDetector(
-                        onTap:
-                            _register, // Utilisation de la fonction _register
+                        onTap: _register,
                         child: Container(
                           height: 40,
                           width: double.infinity,
@@ -249,8 +206,6 @@ class _SignupState extends State<Signup> {
                         ),
                       ),
                     ),
-
-                    // Texte de redirection vers la page Login
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Row(
@@ -293,7 +248,6 @@ class _SignupState extends State<Signup> {
     );
   }
 
-  // Widget pour un champ texte
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,

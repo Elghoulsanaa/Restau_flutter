@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:restaubook/Homepages/Home.dart';
-import 'package:restaubook/pages/ForgotPass.dart';
+import 'package:restaubook/Homepages/Home.dart'; // for User
+import 'package:restaubook/pages/ForgotPass.dart'; // Assuming ForgotPass is another page
 import 'package:restaubook/pages/Signup.dart';
 
 class Login extends StatefulWidget {
@@ -16,7 +16,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  String _selectedRole = "User";
+  String _selectedRole = "User"; // Default role
 
   @override
   void dispose() {
@@ -43,11 +43,22 @@ class _LoginState extends State<Login> {
         password: _passwordController.text.trim(),
       );
 
-      // Redirection vers la page d'accueil en cas de succès
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Home()),
-      );
+      // Vérification du rôle et redirection
+      if (_selectedRole == "User") {
+        // Redirection vers la page d'accueil pour l'utilisateur
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Home()),
+        );
+      } else if (_selectedRole == "Admin") {
+        // Redirection vers la page d'administration pour l'administrateur
+        /* Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  AdminHome()), // Assuming AdminHome is your admin page
+        );*/
+      }
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       if (e.code == 'user-not-found') {
@@ -195,6 +206,70 @@ class _LoginState extends State<Login> {
                                   _obscurePassword = !_obscurePassword;
                                 });
                               },
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Choix du rôle
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Are you?",
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Radio<String>(
+                                  value: "User",
+                                  groupValue: _selectedRole,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedRole = value!;
+                                    });
+                                  },
+                                ),
+                                const Text("User"),
+                                const SizedBox(width: 20),
+                                Radio<String>(
+                                  value: "Admin",
+                                  groupValue: _selectedRole,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedRole = value!;
+                                    });
+                                  },
+                                ),
+                                const Text("Admin"),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Bouton de réinitialisation de mot de passe avec faible opacité
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            // Naviguer vers la page "Forgot Password"
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Forgotpass(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Forgot Password?",
+                            style: TextStyle(
+                              color: Colors.blue.withOpacity(0.5),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore
+import 'package:firebase_core/firebase_core.dart';
+import '../firebase_options.dart';
 
 class Forgotpass extends StatefulWidget {
   const Forgotpass({super.key});
@@ -8,15 +12,74 @@ class Forgotpass extends StatefulWidget {
 }
 
 class _ForgotpassState extends State<Forgotpass> {
-  // Controllers pour les champs de texte
+  // Text Controller for email
   final TextEditingController _emailController = TextEditingController();
 
-  // Variables pour la visibilité des mots de passe
-  bool isPasswordVisible = false;
-  bool isConfirmPasswordVisible = false;
+  // Firestore instance
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Variable pour le rôle sélectionné
-  String _selectedRole = "User"; // Par défaut "User"
+  // Function to send password reset email
+  Future<void> _sendPasswordResetEmail() async {
+    String email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      // Show error if email is empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter your email address"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Check if the user exists in Firestore
+    bool userExists = await _checkIfUserExists(email);
+
+    if (!userExists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("No account found with this email"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Send password reset email
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Password reset email sent!"),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: ${e.toString()}"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // Helper function to check if the user exists in Firestore
+  Future<bool> _checkIfUserExists(String email) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      // Log error if Firestore query fails
+      print("Error checking user existence: $e");
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +91,7 @@ class _ForgotpassState extends State<Forgotpass> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Demi-cercle grenat en haut à gauche
+                // Top design: Semi-circle
                 Container(
                   height: MediaQuery.of(context).size.height * 0.2,
                   decoration: const BoxDecoration(
@@ -66,14 +129,14 @@ class _ForgotpassState extends State<Forgotpass> {
                   ),
                 ),
 
-                // Contenu de la page
+                // Page content
                 Container(
                   color: Colors.white,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Texte de bienvenue
-                      Padding(
+                      // Title
+                      const Padding(
                         padding: EdgeInsets.all(10.0),
                         child: Text(
                           "Forgot Password",
@@ -84,8 +147,8 @@ class _ForgotpassState extends State<Forgotpass> {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
+                      const Padding(
+                        padding: EdgeInsets.all(10.0),
                         child: Text(
                           "Please enter your email address linked with your account",
                           style: TextStyle(
@@ -95,21 +158,18 @@ class _ForgotpassState extends State<Forgotpass> {
                         ),
                       ),
 
-                      // Champ Email
+                      // Email TextField
                       _buildTextField(
                         controller: _emailController,
                         hintText: "Email",
                       ),
 
-                      // Bouton Register
+                      // Send Code Button
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 32.0, vertical: 10.0),
                         child: GestureDetector(
-                          onTap: () {
-                            // Action lors de l'appui sur Register
-                            print("Registered as $_selectedRole");
-                          },
+                          onTap: _sendPasswordResetEmail,
                           child: Container(
                             height: 40,
                             width: double.infinity,
@@ -139,6 +199,7 @@ class _ForgotpassState extends State<Forgotpass> {
     );
   }
 
+  // Helper widget for TextField
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
