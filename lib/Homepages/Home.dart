@@ -1,13 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:restaubook/Homepages/Historique.dart';
+import 'package:restaubook/Homepages/Profile.dart';
 import 'package:restaubook/Homepages/RestaurantDetailPage.dart';
+import 'package:restaubook/Homepages/SearchPage.dart'; // Assure-toi d'importer la page pour la navigation
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -29,8 +34,8 @@ class Home extends StatelessWidget {
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
+                        children: [
+                          const Text(
                             'Hello',
                             style: TextStyle(
                               color: Colors.white,
@@ -38,18 +43,50 @@ class Home extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            'ELGHOUL Sanaa',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                            ),
+                          // Affichage du nom de l'utilisateur depuis Firestore
+                          FutureBuilder<DocumentSnapshot>(
+                            future: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(user?.uid) // Utilise l'ID de l'utilisateur
+                                .get(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              }
+
+                              if (snapshot.hasError) {
+                                return const Text('Error retrieving user name');
+                              }
+
+                              if (snapshot.hasData && snapshot.data != null) {
+                                var userData = snapshot.data?.data()
+                                    as Map<String, dynamic>;
+                                String userName =
+                                    userData['username'] ?? 'User';
+                                return Text(
+                                  userName,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                  ),
+                                );
+                              }
+
+                              return Text(
+                                'User',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
                       const Spacer(),
                       Image.asset(
-                        'images/logoBon.png', // Replace with your actual logo image
+                        'images/logoBon.png', // Remplace par le logo approprié
                         height: 50,
                         width: 50,
                         fit: BoxFit.cover,
@@ -83,29 +120,82 @@ class Home extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List.generate(
-                      6,
-                      (i) => Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            print('Category $i clicked');
-                          },
-                          child: ClipOval(
-                            child: Image.asset(
-                              'images/category_$i.png', // Replace with actual category images
-                              width: 70,
-                              height: 70,
-                              fit: BoxFit.cover,
+                // Récupération des catégories depuis Firestore
+                FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection(
+                          'categories') // Collection Firestore "category"
+                      .get(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                          child: Text('No categories available.'));
+                    }
+
+                    // Affichage des catégories récupérées
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: snapshot.data!.docs.map((doc) {
+                          String name = doc['name']; // Nom de la catégorie
+                          String imageUrl = doc[
+                              'imagePath']; // Chemin de l'image de la catégorie
+
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                // Afficher un message avec le nom de la catégorie
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: Text('$name'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Close'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                // Navigation vers une autre page pour afficher les détails de la catégorie
+                                /* Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CategoryDetailPage(
+                                      categoryName: name, // Passe le nom de la catégorie
+                                      categoryImageUrl: imageUrl, // Passe l'URL de l'image
+                                    ),
+                                  ),
+                                );*/
+                              },
+                              child: ClipOval(
+                                child: Image.network(
+                                  imageUrl, // Charge l'image depuis Firestore
+                                  width: 70,
+                                  height: 70,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        }).toList(),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
                 const Padding(
                   padding: EdgeInsets.all(16.0),
@@ -139,8 +229,8 @@ class Home extends StatelessWidget {
                     // Displaying the list of restaurants
                     return Column(
                       children: snapshot.data!.docs.map((doc) {
-                        String imageUrl = doc[
-                            'imageUrl']; // Assuming imageUrl is stored as a string
+                        String imagePath =
+                            doc['imagePath']; // Récupère le chemin local
                         String name = doc['name'];
                         String address = doc['address'];
                         double rating = doc['rating'].toDouble();
@@ -152,7 +242,9 @@ class Home extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => RestaurantDetailPage(
-                                  imageUrl: imageUrl,
+                                  // restaurantId: doc
+                                  // .id, // Utilisez l'ID du document Firebase
+                                  imageUrl: imagePath,
                                   name: name,
                                   address: address,
                                   rating: rating,
@@ -164,7 +256,7 @@ class Home extends StatelessWidget {
                             );
                           },
                           child: RestaurantCard(
-                            imageUrl: imageUrl,
+                            imagePath: imagePath,
                             name: name,
                             address: address,
                             rating: rating,
@@ -181,27 +273,64 @@ class Home extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Search',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history),
+              label: 'History',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+          selectedItemColor: Colors.blue,
+          unselectedItemColor: Colors.grey,
+          //selectedIconTheme: IconThemeData(color: Colors.green, size: 30),
+          onTap: (index) {
+            if (index == 0) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const Home()), // Navigate to Home page
+              );
+            } else if (index == 1) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const SearchPage()), // Navigate to Search page
+              );
+            } else if (index == 2) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const Historique()), // Stay on Historique page
+              );
+            } else if (index == 3) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const Profile()), // Navigate to Profile page
+              );
+            }
+          }),
     );
   }
 }
 
 class RestaurantCard extends StatelessWidget {
-  final String imageUrl;
+  final String imagePath;
   final String name;
   final String address;
   final double rating;
@@ -209,7 +338,7 @@ class RestaurantCard extends StatelessWidget {
 
   const RestaurantCard({
     Key? key,
-    required this.imageUrl,
+    required this.imagePath,
     required this.name,
     required this.address,
     required this.rating,
@@ -222,8 +351,8 @@ class RestaurantCard extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Image.network(
-            imageUrl, // Use imageUrl fetched from Firestore
+          Image.asset(
+            imagePath, // Charge l'image locale
             height: 150,
             width: double.infinity,
             fit: BoxFit.cover,

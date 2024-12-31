@@ -3,8 +3,19 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 
 class OrderSummaryPage extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
+  final int selectedTableId;
+  final int personCount;
+  final DateTime selectedDate;
+  final String comments;
 
-  const OrderSummaryPage({Key? key, required this.cartItems}) : super(key: key);
+  const OrderSummaryPage({
+    Key? key,
+    required this.cartItems,
+    required this.selectedTableId,
+    required this.personCount,
+    required this.selectedDate,
+    required this.comments,
+  }) : super(key: key);
 
   @override
   _OrderSummaryPageState createState() => _OrderSummaryPageState();
@@ -18,12 +29,12 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
   bool _isCardAdded = false;
   String _cardMessage = '';
 
-  // Variable pour stocker le total
+  // Variable to store total
   double total = 0.0;
 
   @override
   Widget build(BuildContext context) {
-    // Calcul du total
+    // Calculate total
     total = 0.0;
     for (var item in widget.cartItems) {
       total += (item['price'] as double) * (item['quantity'] as int);
@@ -37,7 +48,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Table et Infos Clients
+            // Table and Customer info container
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -46,13 +57,13 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Row(
                     children: [
                       Icon(Icons.table_bar, size: 24),
                       SizedBox(width: 8),
                       Text(
-                        'Table No. R2.3',
+                        'Table No. ${widget.selectedTableId}', // Display selected table ID
                         style: TextStyle(fontSize: 16),
                       ),
                     ],
@@ -62,7 +73,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                       Icon(Icons.person, size: 24),
                       SizedBox(width: 8),
                       Text(
-                        '5 Customers',
+                        '${widget.personCount} Customers', // Display person count
                         style: TextStyle(fontSize: 16),
                       ),
                     ],
@@ -72,7 +83,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             ),
             const SizedBox(height: 20),
 
-            // Articles Sélectionnés
+            // Selected Items List
             Expanded(
               child: ListView.builder(
                 itemCount: widget.cartItems.length,
@@ -89,7 +100,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             ),
             const SizedBox(height: 20),
 
-            // Méthodes de Paiement
+            // Payment Methods
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -123,7 +134,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             ),
             const SizedBox(height: 20),
 
-            // Résumé et Total
+            // Summary and Total
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -160,7 +171,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             ),
             const SizedBox(height: 20),
 
-            // Bouton de Confirmation
+            // Confirmation Button
             ElevatedButton(
               onPressed: () {
                 _confirmOrder();
@@ -259,7 +270,11 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
       orderSummary +=
           '${item['name']} × ${item['quantity']} = ${(item['price'] * item['quantity']).toStringAsFixed(2)} DH\n';
     }
-    orderSummary += '\nTotal: ${total.toStringAsFixed(2)} DH\n';
+    orderSummary += '\nTotal: ${total.toStringAsFixed(2)} DH\n\n';
+    orderSummary += 'Table: ${widget.selectedTableId}\n';
+    orderSummary += 'Customers: ${widget.personCount}\n';
+    orderSummary += 'Date: ${widget.selectedDate}\n';
+    orderSummary += 'Comments: ${widget.comments}\n';
 
     final Email email = Email(
       body: orderSummary,

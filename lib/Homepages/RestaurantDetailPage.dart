@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:restaubook/Homepages/Menu.dart';
@@ -33,12 +35,42 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   TimeOfDay _selectedTime = TimeOfDay.now();
   String _comments = "";
 
-  // Navigate to another page (for example: BookingConfirmationPage)
-  void _goToBookingPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => TableSelectionPage()),
-    );
+  // Function to save the booking to Firestore
+  Future<void> _saveBooking() async {
+    try {
+      // Create a new booking document in the "reservations" collection
+      var reservationRef =
+          FirebaseFirestore.instance.collection('reservations').doc();
+
+      await reservationRef.set({
+        'restaurant': widget.name,
+        'user': FirebaseAuth.instance.currentUser?.email ??
+            "Guest", // User email (or "Guest" if not signed in)
+        'personCount': _personCount,
+        'date': _selectedDate,
+        'time': _selectedTime.format(context),
+        'comments': _comments,
+        'timestamp': FieldValue.serverTimestamp(),
+        'status': 'pending', // Booking status (you can update this later)
+      });
+
+      // Optionally, show a success message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reservation successfully saved!')),
+      );
+
+      // Navigate to a confirmation page
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Menu(),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override
@@ -229,7 +261,20 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: ElevatedButton(
-                    onPressed: _goToBookingPage,
+                    onPressed: () {
+                      // Navigate to CheckoutPage
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TableSelectionPage(
+                            personCount: _personCount,
+                            selectedDate: _selectedDate,
+                            selectedTime: _selectedTime,
+                            comments: _comments,
+                          ),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
                           const Color(0xFFFF800020), // Background color

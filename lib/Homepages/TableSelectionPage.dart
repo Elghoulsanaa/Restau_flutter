@@ -1,30 +1,254 @@
 import 'package:flutter/material.dart';
-import 'package:restaubook/Homepages/CheckPage.dart';
+import 'package:restaubook/Homepages/CheckPage.dart'; // Correct import statement
 
 class TableSelectionPage extends StatefulWidget {
-  const TableSelectionPage({Key? key}) : super(key: key);
+  final int personCount;
+  final DateTime selectedDate;
+  final TimeOfDay selectedTime;
+  final String comments;
+
+  const TableSelectionPage({
+    Key? key,
+    required this.personCount,
+    required this.selectedDate,
+    required this.selectedTime,
+    required this.comments,
+  }) : super(key: key);
 
   @override
   State<TableSelectionPage> createState() => _TableSelectionPageState();
 }
 
 class _TableSelectionPageState extends State<TableSelectionPage> {
-  final List<Table> tables = [
-    Table(id: 1, floor: 1, capacity: 4, status: TableStatus.free),
-    Table(id: 2, floor: 1, capacity: 6, status: TableStatus.reserved),
-    Table(id: 3, floor: 1, capacity: 8, status: TableStatus.free),
-    Table(id: 4, floor: 2, capacity: 4, status: TableStatus.free),
-    Table(id: 5, floor: 2, capacity: 4, status: TableStatus.selected),
-    Table(id: 6, floor: 2, capacity: 6, status: TableStatus.reserved),
-    Table(id: 7, floor: 3, capacity: 4, status: TableStatus.free),
-    Table(id: 8, floor: 3, capacity: 4, status: TableStatus.free),
-    Table(id: 9, floor: 3, capacity: 6, status: TableStatus.free),
+  // Liste des tables avec images statiques
+  final List<TableModel> allTables = [
+    TableModel(
+        id: 1,
+        floor: 1,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 2,
+        floor: 1,
+        capacity: 6,
+        status: TableStatus.reserved,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 3,
+        floor: 1,
+        capacity: 8,
+        status: TableStatus.free,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 4,
+        floor: 1,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 5,
+        floor: 1,
+        capacity: 6,
+        status: TableStatus.reserved,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 6,
+        floor: 1,
+        capacity: 8,
+        status: TableStatus.free,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 7,
+        floor: 1,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 8,
+        floor: 1,
+        capacity: 6,
+        status: TableStatus.reserved,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 9,
+        floor: 1,
+        capacity: 8,
+        status: TableStatus.free,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 10,
+        floor: 1,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 11,
+        floor: 1,
+        capacity: 6,
+        status: TableStatus.reserved,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 12,
+        floor: 1,
+        capacity: 8,
+        status: TableStatus.free,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 13,
+        floor: 2,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 14,
+        floor: 2,
+        capacity: 4,
+        status: TableStatus.selected,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 15,
+        floor: 2,
+        capacity: 6,
+        status: TableStatus.reserved,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 16,
+        floor: 2,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 17,
+        floor: 2,
+        capacity: 4,
+        status: TableStatus.selected,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 18,
+        floor: 2,
+        capacity: 6,
+        status: TableStatus.reserved,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 19,
+        floor: 2,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 20,
+        floor: 2,
+        capacity: 4,
+        status: TableStatus.selected,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 21,
+        floor: 2,
+        capacity: 6,
+        status: TableStatus.reserved,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 22,
+        floor: 2,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 23,
+        floor: 2,
+        capacity: 4,
+        status: TableStatus.selected,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 24,
+        floor: 2,
+        capacity: 6,
+        status: TableStatus.reserved,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 25,
+        floor: 3,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 26,
+        floor: 3,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 27,
+        floor: 3,
+        capacity: 6,
+        status: TableStatus.free,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 28,
+        floor: 3,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 29,
+        floor: 3,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 30,
+        floor: 3,
+        capacity: 6,
+        status: TableStatus.free,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 31,
+        floor: 3,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 32,
+        floor: 3,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 33,
+        floor: 3,
+        capacity: 6,
+        status: TableStatus.free,
+        imagePath: 'images/table3.png'),
+    TableModel(
+        id: 34,
+        floor: 3,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table1.png'),
+    TableModel(
+        id: 35,
+        floor: 3,
+        capacity: 4,
+        status: TableStatus.free,
+        imagePath: 'images/table2.png'),
+    TableModel(
+        id: 36,
+        floor: 3,
+        capacity: 6,
+        status: TableStatus.free,
+        imagePath: 'images/table3.png'),
   ];
 
   int? _selectedTableId;
+  int _selectedFloor = 1; // Étage sélectionné par défaut
 
   @override
   Widget build(BuildContext context) {
+    // Filtrer les tables en fonction de l'étage sélectionné
+    final tables =
+        allTables.where((table) => table.floor == _selectedFloor).toList();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Select Table')),
       body: Padding(
@@ -32,7 +256,18 @@ class _TableSelectionPageState extends State<TableSelectionPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Legend
+            // Boutons pour sélectionner les étages
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildFloorButton(1),
+                _buildFloorButton(2),
+                _buildFloorButton(3),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Légende
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -42,6 +277,8 @@ class _TableSelectionPageState extends State<TableSelectionPage> {
               ],
             ),
             const SizedBox(height: 16),
+
+            // Grille des tables
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -56,13 +293,14 @@ class _TableSelectionPageState extends State<TableSelectionPage> {
                         ? () {
                             setState(() {
                               _selectedTableId = table.id;
-                              for (var t in tables) {
+                              // Update the table status properly
+                              allTables.forEach((t) {
                                 if (t.id == table.id) {
                                   t.status = TableStatus.selected;
                                 } else if (t.status == TableStatus.selected) {
                                   t.status = TableStatus.free;
                                 }
-                              }
+                              });
                             });
                           }
                         : null,
@@ -72,14 +310,23 @@ class _TableSelectionPageState extends State<TableSelectionPage> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Bouton "Continuer"
             ElevatedButton(
               onPressed: _selectedTableId != null
                   ? () {
-                      // Navigate to CheckoutPage
+                      // Naviguer vers la page de confirmation
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Checkpage(),
+                          builder: (context) => CheckPage(
+                            // Corrected class name
+                            personCount: widget.personCount,
+                            selectedDate: widget.selectedDate,
+                            // selectedTime: widget.selectedTime,
+                            comments: widget.comments,
+                            selectedTableId: _selectedTableId!,
+                          ),
                         ),
                       );
                     }
@@ -92,7 +339,8 @@ class _TableSelectionPageState extends State<TableSelectionPage> {
     );
   }
 
-  Widget _buildTableWidget(Table table) {
+  // Widget pour afficher une table avec une image et des informations
+  Widget _buildTableWidget(TableModel table) {
     Color iconColor;
     switch (table.status) {
       case TableStatus.free:
@@ -115,7 +363,13 @@ class _TableSelectionPageState extends State<TableSelectionPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.chair, color: iconColor, size: 40),
+          Image.asset(
+            table.imagePath,
+            height: 60,
+            width: 60,
+            fit: BoxFit.cover,
+          ),
+          const SizedBox(height: 8),
           Text("Table ${table.id}"),
           Text("Capacity: ${table.capacity}"),
         ],
@@ -123,6 +377,7 @@ class _TableSelectionPageState extends State<TableSelectionPage> {
     );
   }
 
+  // Widget pour la légende
   Widget _buildLegend(IconData icon, String label, Color color) {
     return Row(
       children: [
@@ -132,20 +387,39 @@ class _TableSelectionPageState extends State<TableSelectionPage> {
       ],
     );
   }
+
+  // Widget pour les boutons des étages
+  Widget _buildFloorButton(int floor) {
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          _selectedFloor = floor;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _selectedFloor == floor ? Colors.blue : Colors.grey,
+      ),
+      child: Text('Floor $floor'),
+    );
+  }
 }
 
+// Énumération des statuts des tables
 enum TableStatus { free, selected, reserved }
 
-class Table {
+// Modèle de table
+class TableModel {
   final int id;
   final int floor;
   final int capacity;
   TableStatus status;
+  final String imagePath;
 
-  Table({
+  TableModel({
     required this.id,
     required this.floor,
     required this.capacity,
     required this.status,
+    required this.imagePath,
   });
 }
